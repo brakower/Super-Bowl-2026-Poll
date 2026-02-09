@@ -1,0 +1,46 @@
+<div class="page">
+  <h1 class="title">Who’s going to win the Super Bowl?</h1>
+
+  <% if notice.present? %>
+    <div class="flash flash--notice"><%= notice %></div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="flash flash--alert"><%= alert %></div>
+  <% end %>
+
+  <% if @already_voted %>
+    <p class="message">You already voted for <strong><%= @voted_team.name %></strong>.</p>
+
+    <% if !changed_vote? && !@change_mode %>
+      <%= link_to "Change my vote", root_path(change: 1), class: "change-link" %>
+    <% elsif changed_vote? %>
+      <p class="message muted">You already changed your vote.</p>
+    <% end %>
+  <% end %>
+
+  <div class="buttons">
+    <% @teams.each do |team| %>
+      <% disabled = @already_voted && !@change_mode %>
+      <% button_label = @change_mode ? "Change to #{team.name}" : team.name %>
+      <% method = @change_mode ? :patch : :post %>
+
+      <%= form_with url: vote_path, method: method, local: true, class: "vote-form" do |form| %>
+        <%= hidden_field_tag :team, team.name %>
+        <%= form.submit button_label, class: "vote-button", disabled: disabled %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="results">
+    <% @teams.each do |team| %>
+      <div class="result-card">
+        <div class="result-name"><%= team.name %></div>
+        <div class="result-count"><%= team.votes_count %> votes</div>
+        <div class="result-percent"><%= percent_for(team.votes_count, @total_votes) %>%</div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="total">Total votes: <strong><%= @total_votes %></strong></div>
+</div>
